@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/picture_color_transparent_e0db"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/btn1"
+        style="@style/tv_style"
+        android:text="select background" />
+
+    <TextView
+        android:id="@+id/btn2"
+        style="@style/tv_style"
+        android:text="From Photo" />
+
+    <TextView
+        android:id="@+id/btn3"
+        style="@style/tv_style"
+        android:text="Select Animation" />
+
+    <TextView
+        android:id="@+id/btn4"
+        style="@style/tv_style"
+        android:text="cancel" />
+</LinearLayout>
