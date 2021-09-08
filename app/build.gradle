@@ -50,4 +50,5 @@ dependencies {
     implementation 'com.jakewharton:butterknife:10.2.3'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
     implementation 'com.example.weeboos:permissionLib:1.1.6'
+    implementation 'com.don:clockviewlibrary:1.0.1'
 }

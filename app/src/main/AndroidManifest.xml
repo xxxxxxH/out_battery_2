@@ -17,6 +17,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".BackgroundActivity" />
+        <activity android:name=".ChargeActivity" />
+
+        <service android:name="net.service.PowerChangedService"
+            android:enabled="true"/>
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />

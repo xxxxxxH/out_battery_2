@@ -2,8 +2,11 @@ package net.basicmodel;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,8 +24,14 @@ import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
 import com.tencent.mmkv.MMKV;
 
+import net.event.MessageEvent;
+import net.service.PowerChangedService;
 import net.utils.GlideEngine;
 import net.utils.ResourceManager;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +59,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         MMKV.initialize(this);
+        EventBus.getDefault().register(this);
+        startService(new Intent(this, PowerChangedService.class));
         requestPermissions();
+        addReceiver();
     }
 
     private void requestPermissions() {
@@ -81,11 +93,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn.setOnClickListener(this);
     }
 
-    private void addReceiver(){
+    private void addReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        registerReceiver(receiver, intentFilter);
     }
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
+                int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                int rawLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                int percentage = rawLevel / scale;
+                int level = percentage * 100;
+                current.setText("current power" + "\n" + level + "%");
+            }
+        }
+    };
 
     private BottomSheetDialog createBottomSheet() {
         BottomSheetDialog d = new BottomSheetDialog(this);
@@ -99,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void startActivity(String type) {
-        Intent i = new Intent();
+        Intent i = new Intent(this,BackgroundActivity.class);
         i.putExtra("type", type);
         startActivity(i);
     }
@@ -116,8 +142,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             List<LocalMedia> list = PictureSelector.obtainMultipleResult(data);
             String path = list.get(0).getPath();
             Glide.with(this).load(path).into(rootBg);
-            MMKV.defaultMMKV() !!.encode("key_bg", path);
+            MMKV.defaultMMKV().encode("key_bg", path);
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(MessageEvent event){
+        String[] msg = event.getMessage();
+        if (msg[0].equals("BATTERY_CHANGED")){
+            current.setText("current power" + "\n" + msg[1] + "%");
+        }
+        if (msg[0].equals("POWER_CONNECTED")){
+            Intent intent = new Intent(this, ChargeActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+        }
+        if (msg[0].equals("back")){
+            String bgUrl = msg[1];
+            Glide.with(this).load(bgUrl).into(rootBg);
+            MMKV.defaultMMKV().encode("key_bg",bgUrl);
+        }
+        if (msg[0].equals("anim")){
+            String anim = msg[1];
+            Glide.with(this).load(anim).into(this.anim);
+            MMKV.defaultMMKV().encode("anim",anim);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -132,6 +188,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity("back");
                 break;
             case R.id.btn2:
+                openGallery();
+
                 break;
             case R.id.btn3:
                 startActivity("anim");
@@ -142,6 +200,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
         }
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
     }
 }

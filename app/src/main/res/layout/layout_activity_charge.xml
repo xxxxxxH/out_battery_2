@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:don="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+
+    <ImageView
+        android:id="@+id/bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/power"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="20dp"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/anim"
+            android:layout_width="100dp"
+            android:layout_height="80dp"
+            android:layout_below="@+id/power"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+    <com.don.clockviewlibrary.ClockView
+        android:id="@+id/clock"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="48dp"
+        don:circle_color="@android:color/holo_blue_light"
+        don:draw_center_circle="true"
+        don:hour_color="#ff00ff"
+        don:minute_color="@android:color/holo_red_light"
+        don:minute_mark_color="@android:color/white"
+        don:quarter_mark_color="@android:color/black"
+        don:second_color="@android:color/holo_green_light" />
+</RelativeLayout>
